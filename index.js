@@ -14,7 +14,53 @@ app.get("/test", (req,res) => {
     res.send("Server alive")
 })
 
-app.post("/add",async(req,res) => {
+app.get("/todos", async(req,res)=> {
+    const todos = await Todo.findAll()
+    return res.status(200).json(todos)
+})
+
+app.get("/todo/:id", async(req,res) => {
+    const {id} = req.params
+    const todo = await Todo.findByPk(id)
+    if(!todo){
+        return res.status(404).json("todo not found")
+    }
+    return res.status(200).json(todo)
+})
+
+app.put("/todo/:id", async(req,res) => {
+    const {id} = req.params
+    const {title,description} = req.body
+
+    const todo = await Todo.findByPk(id)
+
+    if(!todo){
+        return res.status(404).json({ error: 'Todo not found' });
+    }
+
+    todo.title = title
+    todo.description = description
+
+    await todo.save()
+
+    return res.status(200).json(todo);
+})
+
+app.delete("/todo/:id", async(req,res) => {
+    const {id} = req.params
+
+    const todo = await Todo.findByPk(id)
+
+    if(!todo){
+        return res.status(404).json({ error: 'Todo not found' });
+    }
+
+    await todo.destroy()
+
+    return res.status(200).json("todo deleted");
+})
+
+app.post("/todos",async(req,res) => {
     const {title,description} = req.body 
 
     const todo = await Todo.create({
